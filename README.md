@@ -10,6 +10,14 @@ your current speed**, and wakes you when you arrive.
 > This project is a fork of
 > [Manasteja/proxiwake](https://github.com/Manasteja/proxiwake) (MIT). See `LICENSE`.
 
+## Live app
+
+**[https://sreekeshokky.github.io/proxiwake/](https://sreekeshokky.github.io/proxiwake/)**
+
+Open it on your phone (HTTPS ✓), add it to your Home Screen, and grant location +
+notification permissions. Desktop Chrome's DevTools → **Sensors** panel can simulate
+movement for quick testing.
+
 ## Features
 
 - **App-like full-screen map layout** — the map is the canvas (Google Maps style):
@@ -17,7 +25,7 @@ your current speed**, and wakes you when you arrive.
   sheet holds all options (mode, destination, radius, early warning, screen, intensity);
   during the trip it becomes a live stats card with **Lock screen** and **Cancel trip**.
 - **Interactive map** — Leaflet + OpenStreetMap. Tap the map (or drag the pin) to set
-  your destination; radius shown as a live circle;/user and destination kept framed
+  your destination; radius shown as a live circle; user and destination kept framed
   together while tracking.
 - **Live ETA countdown** — estimates your speed (device-reported + derived, smoothed)
   and counts down the time until the wake-up zone, with an ETA to the destination.
@@ -83,6 +91,16 @@ or `vite-plugin-mkcert`.
 
 On desktop Chrome, mock movement via **DevTools → Sensors → Location** to test the
 ETA, pre-alert (time & distance) and radius alarm.
+
+## Deploy to GitHub Pages
+
+1. Fork or push this repo to `https://github.com/<your-username>/proxiwake`
+2. Repo **Settings → Pages** → *Deploy from a branch* → Branch `main`, folder `/ (root)`
+3. The app goes live at `https://<your-username>.github.io/proxiwake/`
+
+All asset paths are relative and the service worker is registered with `./sw.js`,
+so it works out of the box under a sub-path like `/proxiwake/`. Map tiles, Nominatim
+and the app shell are the only network requirements.
 
 ## How the ETA works
 
