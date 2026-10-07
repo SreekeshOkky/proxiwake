@@ -12,6 +12,9 @@ export const S = {
   preAlertEnabled: DEFAULTS.preAlertEnabled,
   preAlertTimeSecs: DEFAULTS.preAlertTimeSecs,
   preAlertDistanceM: DEFAULTS.preAlertDistanceM,
+  units: DEFAULTS.units,
+  routeEnabled: DEFAULTS.routeEnabled,
+  places: [],
   /* runtime */
   active: false,
   triggered: false,
@@ -32,7 +35,19 @@ export const S = {
   etaAlarm: null,
   etaDest: null,
   etaAt: null,
-  preAlertFired: false
+  etarouted: false,
+  preAlertFired: false,
+  /* trend */
+  trend: 'steady',
+  lastDist: null,
+  /* route */
+  routeDistance: null,
+  routeDuration: null,
+  routeAt: null,
+  /* heading */
+  heading: null,
+  /* snooze */
+  snoozeUntil: 0
 };
 
 /* ── tiny pub/sub ── */
@@ -85,9 +100,29 @@ export function setPreAlert(cfg) {
   emit('prealert', cfg);
 }
 
+export function setUnits(u) {
+  if (u !== 'metric' && u !== 'imperial') return;
+  S.units = u;
+  saveState();
+  emit('units', u);
+}
+
+export function setRouteEnabled(v) {
+  S.routeEnabled = !!v;
+  saveState();
+  emit('routeToggle', S.routeEnabled);
+}
+
+export function setPlaces(list) {
+  S.places = (Array.isArray(list) ? list : []).slice(0, 24);
+  saveState();
+  emit('places', S.places);
+}
+
 export function setActive(v) {
   S.active = v;
   emit('active', v);
+  saveState(); // after emit so startTime/active are current
 }
 
 /* ── persistence ── */
@@ -103,7 +138,12 @@ export function saveState() {
       preAlertEnabled: S.preAlertEnabled,
       preAlertTimeSecs: S.preAlertTimeSecs,
       preAlertDistanceM: S.preAlertDistanceM,
-      autoLock: S.autoLock
+      units: S.units,
+      routeEnabled: S.routeEnabled,
+      places: S.places,
+      autoLock: S.autoLock,
+      active: S.active,
+      startTime: S.startTime
     }));
   } catch (e) { /* storage unavailable */ }
 }
@@ -114,5 +154,6 @@ export function loadState() {
     if (!raw) return;
     const data = JSON.parse(raw);
     if (data && typeof data === 'object') Object.assign(S, data);
+    if (!Array.isArray(S.places)) S.places = [];
   } catch (e) { /* ignore corrupt state */ }
 }

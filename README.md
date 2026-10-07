@@ -31,7 +31,19 @@ movement for quick testing.
   and counts down the time until the wake-up zone, with an ETA to the destination.
 - **Configurable early warning (pre-alert)** — notify before arrival by **time and/or
   distance** (default 5 min *or* 1 km, whichever comes first). Fires a soft tone,
-  vibration and a system notification once, then re-arms.
+  vibration and a system notification once, then re-arms. Suppressed while receding.
+- **Road-aware ETA (OSRM)** — the ETA uses real road distance/duration from the
+  keyless [OSRM](https://project-osrm.org) demo server (throttled, toggleable),
+  falling back to straight-line estimates offline. The routed line is drawn on the map.
+- **Saved places** — pin any destination with a name; recent destinations are kept
+  automatically; one tap re-arms.
+- **Units** — metric (km) ↔ imperial (mi/ft), applied everywhere including speed.
+- **Snoozeable alarm** — snooze for 2 minutes from the trip card or lock screen;
+  it re-fires if still inside the wake-up zone.
+- **Resume after reload** — an active trip survives a page reload and can be resumed
+  (elapsed time continues) or discarded.
+- **Heading arrow** — the live user marker rotates to your direction of travel
+  (device heading, or derived bearing while moving).
 - **Location search** — type any place name (OpenStreetMap Nominatim geocoding).
 - **Manual coordinates / current GPS** — enter lat/lng or use your position.
 - **Three travel modes** — Bus, Train, Flight (different radius ranges).
@@ -70,7 +82,9 @@ js/
   search.js           Nominatim search, manual coords, GPS button
   wakelock.js         screen wake lock
   alarm.js            Web Audio tone, vibration, notifications
-  eta.js              speed estimation, ETA math, pre-alert logic
+  eta.js              speed estimation, ETA math, pre-alert/trend logic
+  route.js            road-aware routing via OSRM (throttled + fallback)
+  places.js           saved destination chips
   tracking.js         geolocation watch + 1s countdown ticker
   lock.js             travel lock overlay (touch blocking + auto-lock)
   main.js             boot & event wiring
@@ -104,13 +118,22 @@ and the app shell are the only network requirements.
 
 ## How the ETA works
 
-- Speed: prefers the device-reported `coords.speed` when sane, otherwise derives it
-  from successive fixes (`distance / dt`), smoothed with an EMA. Fixes with poor
-  accuracy or no movement are ignored; long gaps (tunnels) reset the estimate.
-- ETA to the wake-up zone = `(distance − radius) / speed`; the countdown interpolates
-  smoothly between GPS fixes using a 1-second ticker.
+- **Road-aware (default):** when a route is available from OSRM (bus/train modes;
+  the public demo server, throttled to ~1 fetch/20 s or 150 m of movement), the
+  implied road speed = `road distance / road duration`, and ETAs use remaining road
+  distance. The route polyline replaces the straight dashed line on the map.
+- **Fallback:** the straight-line haversine distance and a smoothed live speed
+  (device-reported `coords.speed` preferred, else derived `distance / dt`, EMA).
+  Fixes with poor accuracy or no movement are ignored; long gaps (tunnels) reset it.
+- ETA to the wake-up zone = remaining distance before the radius; the countdown
+  interpolates between GPS fixes with a 1-second ticker.
 - Pre-alert fires when **either** the time threshold **or** the distance threshold is
-  crossed, then re-arms only after both clear a 15% buffer (hysteresis).
+  crossed (never while receding off the route), then re-arms after both clear a 15%
+  buffer (hysteresis).
+
+Attribution: routing by [OSRM](https://project-osrm.org), map data ©
+[OpenStreetMap](https://www.openstreetmap.org/copyright) contributors — both public,
+keyless services intended for light/demo usage.
 
 ## Known PWA limitations
 

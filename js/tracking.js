@@ -1,13 +1,13 @@
 /* ═══════════════ TRACKING LOOP ═══════════════ */
 import { S } from './state.js';
 import { haversine } from './utils.js';
-import { updateMotion, computeEta, evaluatePreAlert } from './eta.js';
+import { updateMotion, updateTrend, computeEta, evaluatePreAlert, inSnooze } from './eta.js';
 import { triggerAlarm } from './alarm.js';
+import { maybeRefreshRoute } from './route.js';
 import * as ui from './ui.js';
 import * as map from './map.js';
 
-export function startTracking() {
-  S.startTime = Date.now();
+export function startTracking(resume = false) {
   S.initDist = null;
   S.distance = null;
   S.speed = null;
@@ -16,7 +16,12 @@ export function startTracking() {
   S.etaAlarm = null;
   S.etaDest = null;
   S.etaAt = Date.now();
+  S.etarouted = false;
   S.preAlertFired = false;
+  S.trend = 'steady';
+  S.lastDist = null;
+  S.heading = null;
+  if (!resume) S.startTime = Date.now();
 
   if (!navigator.geolocation) {
     ui.updateDistanceText('GPS unavailable');
@@ -40,11 +45,21 @@ export function stopTracking() {
   }
 }
 
+function applyEta(eta) {
+  S.etaAlarm = eta.etaAlarm;
+  S.etaDest = eta.etaDest;
+  S.etarouted = eta.routed;
+  S.etaAt = Date.now();
+}
+
 function onPos(p) {
   const la = p.coords.latitude, lo = p.coords.longitude;
   const d = haversine(la, lo, S.lat, S.lng);
   if (S.initDist === null) S.initDist = d;
   S.distance = d;
+  S.lastAccuracy = p.coords.accuracy;
+
+  const trend = updateTrend(d, p.coords.accuracy);
 
   updateMotion({
     lat: la, lng: lo,
@@ -54,22 +69,34 @@ function onPos(p) {
   });
 
   const eta = computeEta(d);
-  S.etaAlarm = eta.etaAlarm;
-  S.etaDest = eta.etaDest;
-  S.etaAt = Date.now();
+  applyEta(eta);
+
+  const snoozeLeft = inSnooze() ? (S.snoozeUntil - Date.now()) / 1000 : null;
 
   ui.updateCoords(la, lo);
   ui.updateDistance(d);
   ui.updateProgress(d);
   ui.updateSpeed(S.speed);
   ui.updateBattery(d);
-  ui.updateEtaCountdown(S.etaAlarm, S.etaDest, S.speed);
-  map.updateUser(la, lo);
+  ui.updateEtaCountdown(S.etaAlarm, S.etaDest, S.speed, snoozeLeft, trend);
+  map.updateUser(la, lo, p.coords.heading);
   map.fitBoth(false);
 
-  evaluatePreAlert(d, S.etaAlarm);
+  evaluatePreAlert(d, S.etaAlarm, trend);
 
-  if (d <= S.radius && !S.triggered) triggerAlarm();
+  if (d <= S.radius && !S.triggered && !inSnooze()) triggerAlarm();
+
+  /* keep the road-aware route fresh in the background */
+  maybeRefreshRoute({ lat: la, lng: lo }, { lat: S.lat, lng: S.lng }).then(r => {
+    if (!r) return;
+    S.routeDistance = r.distanceM;
+    S.routeDuration = r.durationS;
+    S.routeAt = Date.now();
+    const drawn = map.setRoutePolyline(r.geometry);
+    const eta2 = computeEta(d, r.distanceM != null ? r : null);
+    applyEta(eta2);
+    ui.updateEtaCountdown(S.etaAlarm, S.etaDest, S.speed, inSnooze() ? (S.snoozeUntil - Date.now()) / 1000 : null, trend);
+  }).catch(() => {});
 }
 
 function onErr(e) {
@@ -82,6 +109,13 @@ function tick() {
 
   ui.updateElapsed(Math.floor((Date.now() - S.startTime) / 1000));
 
+  /* snoozed: show snooze countdown; the normal branch re-fires on expiry */
+  if (inSnooze()) {
+    const left = (S.snoozeUntil - Date.now()) / 1000;
+    ui.updateEtaCountdown(null, null, S.speed, left, S.trend);
+    return;
+  }
+
   let etaRemaining = null;
   let etaDestRemaining = null;
   if (S.etaAlarm != null) {
@@ -90,6 +124,9 @@ function tick() {
     etaDestRemaining = Math.max(0, S.etaDest - elapsed);
   }
 
-  ui.updateEtaCountdown(etaRemaining, etaDestRemaining, S.speed);
-  evaluatePreAlert(S.distance, etaRemaining);
+  ui.updateEtaCountdown(etaRemaining, etaDestRemaining, S.speed, null, S.trend);
+  evaluatePreAlert(S.distance, etaRemaining, S.trend);
+
+  /* re-fire after a snooze expires while still inside the zone */
+  if (S.distance != null && S.distance <= S.radius && !S.triggered) triggerAlarm();
 }

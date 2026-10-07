@@ -72,7 +72,20 @@ export const ICONS = {
   ),
   arrow: wrap('<path d="M5 12h13.5M12.8 5.7 19 12l-6.2 6.3"/>'),
   chev: wrap('<path d="m6 14.5 6-5.5 6 5.5" transform="translate(0,-1)"/>'),
-  stop: wrap('<rect x="6.5" y="6.5" width="11" height="11" rx="2.5"/>')
+  stop: wrap('<rect x="6.5" y="6.5" width="11" height="11" rx="2.5"/>'),
+  bookmark: wrap('<path d="M6.5 3h11v18l-5.5-4.2L6.5 21V3z"/>'),
+  snooze: wrap(
+    '<circle cx="10.5" cy="13.5" r="7"/>' +
+    '<path d="M10.5 10.5V13.5l2.2 1.4"/>' +
+    '<path d="M16.5 4.5h4l-4 4h4"/>'
+  ),
+  route: wrap(
+    '<circle cx="6" cy="19" r="2.4"/>' +
+    '<circle cx="18" cy="5" r="2.4"/>' +
+    '<path d="M8.4 19H14a3.6 3.6 0 0 0 0-7.2H10a3.6 3.6 0 0 1 0-7.2h5.6"/>'
+  ),
+  resume: wrap('<path d="M20.8 12a8.8 8.8 0 1 1-2.6-6.2"/><path d="M21 3.2V8h-4.8"/>'),
+  cross: wrap('<path d="M6 6l12 12M18 6 6 18"/>')
 };
 
 export function icon(name) { return ICONS[name] || ''; }

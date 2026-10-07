@@ -1,10 +1,11 @@
-const CACHE_NAME = 'proxiwake-v0.8';
+const CACHE_NAME = 'proxiwake-v0.9';
 const ASSETS = [
   './', './index.html', './manifest.json',
   './css/styles.css',
   './js/main.js', './js/config.js', './js/state.js', './js/utils.js', './js/ui.js',
   './js/map.js', './js/search.js', './js/wakelock.js', './js/alarm.js',
   './js/eta.js', './js/tracking.js', './js/lock.js', './js/icons.js',
+  './js/route.js', './js/places.js',
   './assets/icons/icon-192.png', './assets/icons/icon-512.png',
   './assets/icons/maskable-512.png', './assets/icons/apple-touch-icon.png',
   './vendor/leaflet/leaflet.css', './vendor/leaflet/leaflet.js',
@@ -50,6 +51,11 @@ self.addEventListener('fetch', e => {
           return res;
         }))
     );
+    return;
+  }
+  // Network-only for live data that must never go stale
+  if (url.includes('project-osrm.org') || url.includes('/route/v1/')) {
+    e.respondWith(fetch(e.request));
     return;
   }
   // Network-first for live data (geocoding + map tiles)

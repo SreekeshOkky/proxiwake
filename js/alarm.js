@@ -1,6 +1,7 @@
 /* ═══════════════ ALARM (tone / vibration / notification) ═══════════════ */
 import { S } from './state.js';
 import { fmt } from './utils.js';
+import { SNOOZE_SECS } from './config.js';
 
 /* ── Web Audio tone ──
  * level 1 = gentle, 2 = moderate, 3 = aggressive.
@@ -117,6 +118,15 @@ export function stopAlarm() {
         .catch(() => {});
     }
   } catch (e) { /* noop */ }
+}
+
+/* Snooze the alarm: stop ringing now, re-arm after SNOOZE_SECS. */
+export function snoozeAlarm() {
+  if (!S.triggered) return;
+  stopAlarm();
+  S.triggered = false;
+  S.snoozeUntil = Date.now() + SNOOZE_SECS * 1000;
+  document.dispatchEvent(new CustomEvent('proxiwake:snooze', { detail: { secs: SNOOZE_SECS } }));
 }
 
 export function requestNotificationPermission() {

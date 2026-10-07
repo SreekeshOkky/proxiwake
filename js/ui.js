@@ -1,7 +1,7 @@
 /* ═══════════════ UI RENDERING ═══════════════ */
-import { S, on } from './state.js';
+import { S, on, setUnits as pushUnits } from './state.js';
 import { MODES } from './config.js';
-import { $, fmt, fmtDuration, clamp } from './utils.js';
+import { $, fmt, fmtDuration, fmtSpeed, clamp, setUnits, getUnits } from './utils.js';
 import { icon } from './icons.js';
 
 export const el = {};
@@ -9,7 +9,7 @@ export const el = {};
 const IDS = [
   'v-setup', 'v-track',
   'search-box', 'search-results',
-  'inp-lat', 'inp-lng', 'btn-gps', 'btn-stop', 'btn-go',
+  'inp-lat', 'inp-lng', 'btn-gps', 'btn-stop', 'btn-go', 'btn-snooze',
   'rad-slider', 'rad-val', 'rad-min', 'rad-max',
   'pre-toggle', 'pre-time', 'pre-distance', 'pre-warn',
   't-icon', 't-name', 't-coords',
@@ -18,7 +18,9 @@ const IDS = [
   'c-mylat', 'c-mylng', 'c-tlat', 'c-tlng', 'c-speed',
   'eta-box', 'eta-label', 'eta-val', 'eta-sub',
   's-bat', 's-bat-text', 's-wl', 's-wl-dot', 's-wl-text',
-  'r-dot'
+  'r-dot',
+  'units-metric', 'units-imperial', 'route-toggle',
+  'resume-banner', 'resume-text', 'btn-resume', 'btn-discard'
 ];
 
 export function initUI() {
@@ -29,11 +31,16 @@ export function initUI() {
   on('mode', m => setModeUI(m));
   on('alarm', lv => setAlarmUI(lv));
   on('prealert', () => { syncPreAlertInputs(); updatePreAlertHint(); });
+  on('units', u => setUnitsUI(u));
+  on('routeToggle', v => syncRouteToggle(v));
 
+  setUnits(S.units);
   setModeUI(S.mode);
   setAlarmUI(S.alarm);
   syncInputsFromState();
   syncPreAlertInputs();
+  setUnitsUI(S.units);
+  syncRouteToggle(S.routeEnabled);
   checkReady();
   updatePreAlertHint();
 }
@@ -109,6 +116,37 @@ export function updatePreAlertHint() {
   }
 }
 
+/* ── units & display toggles ── */
+export function setUnitsUI(u) {
+  if (el['units-metric']) el['units-metric'].classList.toggle('active', u === 'metric');
+  if (el['units-imperial']) el['units-imperial'].classList.toggle('active', u === 'imperial');
+  updateRadiusLabel();
+  if (S.lat != null && S.lng != null) updateTargetMeta();
+}
+
+export function syncRouteToggle(v) {
+  if (el['route-toggle']) el['route-toggle'].checked = !!v;
+}
+
+export function updatePreDistanceLabel() {
+  const lb = el['pre-distance'] && el['pre-distance'].closest('.field-label');
+  if (lb && lb.childNodes[0]) {
+    lb.childNodes[0].nodeValue = getUnits() === 'imperial'
+      ? 'Distance before (ft)' : 'Distance before (m)';
+  }
+}
+
+/* ── resume banner ── */
+export function showResume() {
+  if (!el['resume-banner']) return;
+  el['resume-text'].textContent = S.name ? `Trip to ${S.name} in progress` : 'Trip in progress';
+  el['resume-banner'].style.display = 'flex';
+}
+
+export function hideResume() {
+  if (el['resume-banner']) el['resume-banner'].style.display = 'none';
+}
+
 /* ── tracking: header ── */
 export function updateTargetMeta() {
   el['t-icon'].dataset.icon = MODES[S.mode].icon;
@@ -142,9 +180,7 @@ export function updateProgress(d) {
 }
 
 export function updateSpeed(speed) {
-  el['c-speed'].textContent = (speed != null && speed >= 0)
-    ? (speed * 3.6).toFixed(0) + ' km/h'
-    : '—';
+  el['c-speed'].textContent = fmtSpeed(speed);
 }
 
 export function updateElapsed(secs) {
@@ -152,12 +188,18 @@ export function updateElapsed(secs) {
   el['t-elapsed'].textContent = 'Tracking for ' + (m ? m + 'm ' : '') + (secs % 60) + 's';
 }
 
-export function updateEtaCountdown(etaAlarmRemaining, etaDestRemaining, speed) {
+export function updateEtaCountdown(etaAlarmRemaining, etaDestRemaining, speed, snoozeLeft, trend) {
   const val = el['eta-val'], sub = el['eta-sub'], label = el['eta-label'];
   if (S.triggered) {
     label.textContent = 'Wake-up zone reached';
     val.textContent = 'NOW';
     sub.textContent = S.name || 'destination';
+    return;
+  }
+  if (snoozeLeft != null) {
+    label.textContent = 'Alarm snoozed';
+    val.textContent = fmtDuration(snoozeLeft);
+    sub.textContent = 'Will ring again soon';
     return;
   }
   if (etaAlarmRemaining == null) {
@@ -168,9 +210,11 @@ export function updateEtaCountdown(etaAlarmRemaining, etaDestRemaining, speed) {
   }
   label.textContent = 'ETA to wake-up zone';
   val.textContent = fmtDuration(etaAlarmRemaining);
-  sub.textContent = etaDestRemaining != null
-    ? '≈ ' + fmtDuration(etaDestRemaining) + ' to destination'
-    : '';
+  sub.textContent = trend === 'recede'
+    ? 'moving away from the wake-up zone'
+    : (etaDestRemaining != null
+        ? '≈ ' + fmtDuration(etaDestRemaining) + ' to destination'
+        : '');
 }
 
 export function updateBattery(d) {

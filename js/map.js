@@ -7,6 +7,7 @@ let targetMarker = null;
 let userMarker = null;
 let radiusCircle = null;
 let routeLine = null;
+let hasRouteGeometry = false;
 let ready = false;
 
 const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -15,8 +16,19 @@ const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" targe
 function targetIcon() {
   return L.divIcon({ className: 'pw-marker pw-marker-target', iconSize: [22, 22], iconAnchor: [11, 11] });
 }
-function userIcon() {
-  return L.divIcon({ className: 'pw-marker pw-marker-user', iconSize: [16, 16], iconAnchor: [8, 8] });
+
+const ARROW_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 6 20l6-4 6 4-6-16z"/></svg>';
+
+function userIcon(heading) {
+  if (heading == null || isNaN(heading)) {
+    return L.divIcon({ className: 'pw-marker pw-marker-user', iconSize: [16, 16], iconAnchor: [8, 8] });
+  }
+  return L.divIcon({
+    className: 'pw-marker pw-marker-heading',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    html: `<div class="pw-arrow" style="transform:rotate(${Math.round(heading)}deg)">${ARROW_SVG}</div>`
+  });
 }
 
 export function initMap() {
@@ -50,9 +62,35 @@ export function initMap() {
   ready = true;
   setTimeout(() => map.invalidateSize(), 200);
 
-  on('target', () => drawTarget(true));
+  on('target', () => { clearRouteLine(); drawTarget(true); });
   on('radius', () => drawCircle());
   on('mode', () => drawCircle());
+}
+
+/* ── routed polyline from OSRM ── */
+export function setRoutePolyline(latlngs) {
+  if (!ready || !latlngs || latlngs.length < 2) return false;
+  if (!routeLine) {
+    routeLine = L.polyline(latlngs, {
+      color: '#10B981',
+      weight: 4,
+      opacity: 0.85,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(map);
+  } else {
+    routeLine.setLatLngs(latlngs);
+    routeLine.setStyle({ dashArray: null, opacity: 0.85, weight: 4 });
+  }
+  routeLine.bringToBack();
+  hasRouteGeometry = true;
+  return true;
+}
+
+export function clearRouteLine() {
+  if (!ready) return;
+  if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+  hasRouteGeometry = false;
 }
 
 function drawTarget(fly) {
@@ -95,20 +133,22 @@ function drawCircle() {
   }
 }
 
-/* Live user position */
-export function updateUser(lat, lng) {
+/* Live user position (heading in degrees, or null) */
+export function updateUser(lat, lng, heading) {
   if (!ready) return;
   const ll = [lat, lng];
+  const ic = userIcon(heading);
   if (!userMarker) {
-    userMarker = L.marker(ll, { icon: userIcon(), interactive: false }).addTo(map);
+    userMarker = L.marker(ll, { icon: ic, interactive: false }).addTo(map);
   } else {
     userMarker.setLatLng(ll);
+    userMarker.setIcon(ic);
   }
   updateLine(lat, lng);
 }
 
 function updateLine(lat, lng) {
-  if (!ready || S.lat === null) return;
+  if (!ready || S.lat === null || hasRouteGeometry) return; // routed line wins
   const pts = [[lat, lng], [S.lat, S.lng]];
   if (!routeLine) {
     routeLine = L.polyline(pts, { color: '#10B981', weight: 1.5, dashArray: '4 6', opacity: 0.6 }).addTo(map);

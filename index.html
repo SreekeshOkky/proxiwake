@@ -47,6 +47,13 @@
 <div id="v-setup" class="sheet open">
   <div class="sheet-grab" role="button" aria-label="Expand options"></div>
 
+  <div id="resume-banner" style="display:none">
+    <span class="resume-ic" data-icon="resume"></span>
+    <span class="resume-text" id="resume-text">Trip in progress</span>
+    <button class="resume-btn" id="btn-resume">Resume</button>
+    <button class="resume-btn resume-discard" id="btn-discard">Discard</button>
+  </div>
+
   <div class="sheet-summary" id="setup-summary-row">
     <span class="sheet-pin"><span data-icon="pin"></span></span>
     <span class="sheet-summary-text" id="setup-summary">Choose a destination</span>
@@ -74,6 +81,8 @@
 
     <div class="card">
       <div class="card-title"><span data-icon="search"></span>Destination</div>
+      <div class="place-chips" id="place-chips"></div>
+      <button class="ghost-btn ghost-sm" id="btn-save-place"><span class="ghost-ic" data-icon="bookmark"></span>Save this place</button>
       <div class="search-wrap">
         <input class="input-field has-ic" type="search" id="search-box" placeholder="Search any place, station, city..." autocomplete="off" autocorrect="off" spellcheck="false">
         <span class="field-ic" data-icon="search"></span>
@@ -119,8 +128,16 @@
     </div>
 
     <div class="card">
-      <div class="card-title"><span data-icon="screen"></span>Screen</div>
-      <label class="switch-row">
+      <div class="card-title"><span data-icon="screen"></span>Screen &amp; display</div>
+      <div class="seg" id="units-seg" role="group" aria-label="Units">
+        <button class="seg-btn active" id="units-metric">Metric (km)</button>
+        <button class="seg-btn" id="units-imperial">Imperial (mi)</button>
+      </div>
+      <label class="switch-row" style="margin-top:10px">
+        <span>Road-aware ETA (via roads)</span>
+        <input type="checkbox" id="route-toggle" class="switch" checked>
+      </label>
+      <label class="switch-row" style="margin-top:8px">
         <span>Auto-lock while traveling</span>
         <input type="checkbox" id="auto-lock-toggle" class="switch" checked>
       </label>
@@ -145,7 +162,7 @@
       </div>
     </div>
 
-    <div class="sheet-foot">ProxiWake v0.8 · Installable PWA · Wake Lock keeps GPS alive</div>
+    <div class="sheet-foot">ProxiWake v0.9 · Installable PWA · Wake Lock keeps GPS alive</div>
   </div>
 </div>
 
@@ -176,9 +193,10 @@
   <div class="progress-bar"><div class="progress-fill" id="p-fill" style="width:0%"></div></div>
   <div class="progress-labels"><span id="t-elapsed">Tracking for 0s</span><span id="t-pct">0% there</span></div>
 
-  <div class="sheet-actions">
-    <button class="ghost-btn trip-btn" id="btn-lock"><span class="ghost-ic" data-icon="lock"></span>Lock screen</button>
-    <button class="btn-stop" id="btn-stop"><span class="stop-ic" data-icon="stop"></span>Cancel trip</button>
+  <div class="sheet-actions three">
+    <button class="ghost-btn trip-btn" id="btn-lock"><span class="ghost-ic" data-icon="lock"></span>Lock</button>
+    <button class="ghost-btn trip-btn" id="btn-snooze"><span class="ghost-ic" data-icon="snooze"></span>Snooze</button>
+    <button class="btn-stop stop-sm" id="btn-stop"><span class="stop-ic" data-icon="stop"></span>Cancel</button>
   </div>
 
   <div class="sheet-detail">
@@ -218,6 +236,7 @@
       <span class="lock-hold-fill"></span>
       <span class="lock-hold-text">Hold to unlock</span>
     </button>
+    <button class="lock-snooze" id="btn-snooze-lock"><span data-icon="snooze"></span>Snooze alarm 2 min</button>
     <div class="lock-hint">Touch is disabled to prevent accidental taps</div>
   </div>
 </div>
