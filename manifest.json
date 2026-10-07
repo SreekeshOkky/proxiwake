@@ -2,17 +2,31 @@
   "name": "ProxiWake — Location Alarm",
   "short_name": "ProxiWake",
   "description": "GPS proximity alarm for travelers. Never miss your stop again.",
+  "id": "proxiwake-app",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0A0F1C",
-  "theme_color": "#0A0F1C",
+  "background_color": "#070B14",
+  "theme_color": "#070B14",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230A0F1C'/><circle cx='256' cy='256' r='140' stroke='%2310B981' stroke-width='16' fill='none' opacity='.3'/><circle cx='256' cy='256' r='85' stroke='%2310B981' stroke-width='10' fill='none' opacity='.5'/><circle cx='256' cy='256' r='35' fill='%2310B981'/></svg>",
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "categories": ["travel", "utilities"],

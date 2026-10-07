@@ -3,585 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0A0F1C">
+<meta name="theme-color" content="#070B14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="ProxiWake - GPS proximity alarm for travelers. Never miss your stop again.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='17' stroke='%2310B981' stroke-width='2.5' fill='none' opacity='.3'/><circle cx='20' cy='20' r='5' fill='%2310B981'/></svg>">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230A0F1C'/><circle cx='90' cy='90' r='50' stroke='%2310B981' stroke-width='6' fill='none' opacity='.3'/><circle cx='90' cy='90' r='30' stroke='%2310B981' stroke-width='4' fill='none' opacity='.5'/><circle cx='90' cy='90' r='12' fill='%2310B981'/></svg>">
+<meta name="description" content="ProxiWake - GPS proximity alarm with map and live ETA. Never miss your stop again.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'><rect width='72' height='72' rx='17' fill='%23070B14'/><circle cx='36' cy='36' r='22' stroke='%2310B981' stroke-width='3' fill='none' opacity='.32'/><circle cx='36' cy='36' r='12' stroke='%2310B981' stroke-width='3' fill='none' opacity='.58'/><circle cx='36' cy='36' r='4.5' fill='%2334D399'/></svg>">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="assets/splash/1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" href="assets/splash/1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" href="assets/splash/1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="assets/splash/1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="assets/splash/1242x2688.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="assets/splash/828x1792.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="assets/splash/1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="assets/splash/750x1334.png">
+<link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" href="assets/splash/1536x2048.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" href="assets/splash/1668x2388.png">
+<link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" href="assets/splash/2048x2732.png">
 <title>ProxiWake — Location Alarm</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#0A0F1C;--bg2:#111827;--bg3:#1A2235;--bg4:#232D42;
-  --fg:#E8ECF4;--fg2:#9CA3B4;--fg3:#5C6478;
-  --accent:#10B981;--accent-glow:#10B98133;
-  --warn:#F59E0B;--danger:#EF4444;--danger-glow:#EF444433;
-  --radius:14px;--radius-sm:10px;
-  --font:'DM Sans',system-ui,-apple-system,sans-serif;
-  --mono:'JetBrains Mono',ui-monospace,monospace;
-  --safe-top:env(safe-area-inset-top,0px);
-  --safe-bottom:env(safe-area-inset-bottom,0px);
-}
-html{height:100%;-webkit-text-size-adjust:100%}
-body{min-height:100%;font-family:var(--font);background:var(--bg);color:var(--fg);
-  overflow-x:hidden;-webkit-tap-highlight-color:transparent;
-  display:flex;flex-direction:column;max-width:480px;margin:0 auto;
-  padding-top:var(--safe-top);padding-bottom:var(--safe-bottom)}
-
-/* ── Animations ── */
-@keyframes pulse-ring{0%{transform:scale(.6);opacity:.7}100%{transform:scale(2.2);opacity:0}}
-@keyframes pulse-dot{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes slide-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes shake{0%,100%{transform:translateX(0)}15%,45%,75%{transform:translateX(-3px)}30%,60%,90%{transform:translateX(3px)}}
-@keyframes fade-in{from{opacity:0}to{opacity:1}}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-.fade-in{animation:fade-in .35s ease}
-.slide-up{animation:slide-up .45s cubic-bezier(.16,1,.3,1) both}
-
-/* ── Header ── */
-.header{padding:20px 20px 0;text-align:center}
-.logo{display:inline-flex;align-items:center;gap:10px;margin-bottom:6px}
-.logo svg{width:36px;height:36px}
-.logo-text{font-size:22px;font-weight:600;letter-spacing:-.03em}
-.subtitle{font-size:13px;color:var(--fg3)}
-
-/* ── Cards ── */
-.card{background:var(--bg2);border:1px solid #1F2A3F;border-radius:var(--radius);padding:18px;margin:0 16px 12px}
-.card-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--fg3);margin-bottom:12px}
-
-/* ── Mode Buttons — iOS-safe touch targets ── */
-.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.mode-btn{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:var(--bg3);border:1.5px solid transparent;border-radius:var(--radius-sm);
-  padding:14px 6px;cursor:pointer;transition:border-color .2s,background .2s;
-  -webkit-appearance:none;appearance:none;font-family:var(--font);
-  -webkit-user-select:none;user-select:none;
-  min-height:88px;/* iOS touch target */
-  touch-action:manipulation;/* prevent double-tap zoom */
-}
-.mode-btn:active{transform:scale(.97)}
-.mode-btn.active{border-color:var(--accent);background:#10B98112}
-.mode-icon{font-size:26px;line-height:1;margin-bottom:4px;pointer-events:none}
-.mode-label{font-size:13px;font-weight:500;color:var(--fg);pointer-events:none}
-.mode-sub{font-size:10px;color:var(--fg3);margin-top:2px;pointer-events:none}
-
-/* ── Inputs ── */
-.input-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.input-field{
-  background:var(--bg3);border:1px solid #2A3650;border-radius:var(--radius-sm);
-  padding:12px 14px;font-size:16px;/* 16px prevents iOS zoom on focus */
-  color:var(--fg);font-family:var(--font);width:100%;outline:none;
-  transition:border-color .2s;-webkit-appearance:none;appearance:none;
-}
-.input-field:focus{border-color:var(--accent)}
-.input-field::placeholder{color:var(--fg3)}
-
-/* ── Search Results ── */
-.search-wrap{position:relative;margin-bottom:8px}
-.search-results{
-  position:absolute;top:100%;left:0;right:0;z-index:50;
-  background:var(--bg2);border:1px solid #2A3650;border-radius:var(--radius-sm);
-  max-height:260px;overflow-y:auto;margin-top:4px;
-  -webkit-overflow-scrolling:touch;
-  display:none;
-}
-.search-results.open{display:block}
-.sr-item{
-  padding:12px 14px;cursor:pointer;border-bottom:1px solid #1A2235;
-  transition:background .1s;touch-action:manipulation;
-  -webkit-user-select:none;user-select:none;
-}
-.sr-item:active{background:var(--bg3)}
-.sr-item:last-child{border-bottom:none}
-.sr-name{font-size:13px;font-weight:500;color:var(--fg);line-height:1.3}
-.sr-detail{font-size:11px;color:var(--fg3);margin-top:3px;line-height:1.3}
-.sr-coord{font-size:11px;color:var(--accent);font-family:var(--mono);margin-top:2px}
-.search-hint{padding:12px 14px;font-size:12px;color:var(--fg3);text-align:center}
-.search-loading{padding:14px;text-align:center;font-size:12px;color:var(--fg3)}
-.search-loading::after{content:'';display:inline-block;width:14px;height:14px;border:2px solid var(--fg3);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-left:8px}
-
-/* ── GPS Button ── */
-.gps-btn{
-  width:100%;padding:12px;background:transparent;
-  border:1px dashed #2A3650;border-radius:var(--radius-sm);
-  color:var(--accent);font-size:13px;font-weight:500;
-  cursor:pointer;font-family:var(--font);transition:border-color .2s;
-  touch-action:manipulation;-webkit-user-select:none;user-select:none;
-}
-.gps-btn:active{background:#10B98108;border-color:var(--accent)}
-
-/* ── Slider ── */
-.slider-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
-.slider-value{font-size:20px;font-weight:500;color:var(--accent);font-family:var(--mono)}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--bg3);outline:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
-input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
-.slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--fg3);margin-top:6px}
-
-/* ── Alarm Level Buttons ── */
-.alarm-levels{display:flex;gap:8px}
-.alarm-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:var(--bg3);border:1.5px solid transparent;border-radius:var(--radius-sm);
-  padding:12px 6px;cursor:pointer;font-family:var(--font);
-  transition:border-color .2s,background .2s;
-  -webkit-appearance:none;appearance:none;
-  touch-action:manipulation;-webkit-user-select:none;user-select:none;
-  min-height:64px;
-}
-.alarm-btn:active{transform:scale(.97)}
-.alarm-btn.a-green{border-color:var(--accent);background:#10B98112}
-.alarm-btn.a-yellow{border-color:var(--warn);background:#F59E0B12}
-.alarm-btn.a-red{border-color:var(--danger);background:#EF444412}
-.alarm-label{font-size:13px;font-weight:500;pointer-events:none}
-.alarm-desc{font-size:10px;color:var(--fg3);margin-top:3px;pointer-events:none}
-
-/* ── Primary Button ── */
-.btn-primary{
-  display:block;width:calc(100% - 32px);margin:8px 16px 0;padding:16px;
-  border:none;border-radius:var(--radius);font-size:16px;font-weight:500;
-  font-family:var(--font);cursor:pointer;transition:all .25s;
-  touch-action:manipulation;-webkit-user-select:none;user-select:none;
-}
-.btn-primary.ready{background:var(--accent);color:#fff}
-.btn-primary.ready:active{transform:scale(.98);opacity:.9}
-.btn-primary.disabled{background:var(--bg3);color:var(--fg3);pointer-events:none}
-
-/* ═══════ TRACKING VIEW ═══════ */
-.tracking-view{display:flex;flex-direction:column;align-items:center;flex:1;padding:16px}
-
-.radar-container{position:relative;width:150px;height:150px;display:flex;align-items:center;justify-content:center;margin:16px 0}
-.radar-ring{position:absolute;width:100%;height:100%;border-radius:50%;border:2px solid var(--accent);opacity:0}
-.radar-ring.on{animation:pulse-ring 3s ease-out infinite}
-.radar-ring:nth-child(2){animation-delay:1s}
-.radar-ring:nth-child(3){animation-delay:2s}
-.radar-dot{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .5s}
-.radar-dot.tracking{background:var(--accent);animation:pulse-dot 2s ease-in-out infinite}
-.radar-dot.arriving{background:var(--danger);animation:pulse-dot .7s ease-in-out infinite}
-
-.dest-info{text-align:center;margin-bottom:12px}
-.dest-name{font-size:18px;font-weight:500}
-.dest-coords{font-size:12px;color:var(--fg3);font-family:var(--mono);margin-top:4px}
-
-.distance-box{width:100%;padding:22px;border-radius:var(--radius);text-align:center;transition:all .5s;margin-bottom:14px}
-.distance-box.normal{background:var(--bg2);border:1px solid #1F2A3F}
-.distance-box.alert{background:#EF444415;border:2px solid var(--danger)}
-.distance-label{font-size:12px;color:var(--fg3);margin-bottom:4px}
-.distance-value{font-size:40px;font-weight:600;font-family:var(--mono);letter-spacing:-.02em;transition:color .3s}
-.alert-text{font-size:14px;font-weight:500;color:var(--danger);animation:blink 1s infinite;margin-bottom:4px}
-
-.progress-bar{width:100%;height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-bottom:6px}
-.progress-fill{height:100%;border-radius:3px;transition:width 1s ease,background .3s}
-.progress-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--fg3);margin-bottom:14px;width:100%}
-
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:12px}
-.info-cell{background:var(--bg2);border-radius:var(--radius-sm);padding:10px 12px}
-.info-cell-label{font-size:10px;color:var(--fg3);text-transform:uppercase;letter-spacing:.04em}
-.info-cell-value{font-size:13px;font-family:var(--mono);color:var(--fg);margin-top:2px}
-
-.status-bar{width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--bg2);border:1px solid #1F2A3F;margin-bottom:10px}
-.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.status-dot.green{background:var(--accent)}
-.status-dot.yellow{background:var(--warn)}
-.status-label{font-size:12px;color:var(--fg2);line-height:1.4}
-.status-label b{color:var(--fg);font-weight:500}
-
-.btn-stop{
-  width:100%;padding:14px;border:1.5px solid #3A2020;border-radius:var(--radius);
-  background:transparent;color:var(--danger);font-size:14px;font-weight:500;
-  font-family:var(--font);cursor:pointer;margin-top:auto;
-  touch-action:manipulation;-webkit-user-select:none;user-select:none;
-}
-.btn-stop:active{background:#EF444415}
-
-.footer{padding:20px 16px;text-align:center;font-size:11px;color:var(--fg3);line-height:1.5}
-</style>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-<div class="header slide-up">
-  <div class="logo">
-    <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" stroke="#10B981" stroke-width="2.5" opacity=".3"/><circle cx="20" cy="20" r="11" stroke="#10B981" stroke-width="2" opacity=".5"/><circle cx="20" cy="20" r="5" fill="#10B981"/></svg>
-    <span class="logo-text">ProxiWake</span>
-  </div>
-  <div class="subtitle">Location-triggered alarm for travelers</div>
+<!-- ═══════════════ FULL-SCREEN MAP ═══════════════ -->
+<div id="map-stage"><div id="map"></div></div>
+
+<!-- floating brand chip -->
+<div class="brand-chip" id="brand-chip">
+  <span class="brand-mark" data-icon="logo"></span>
+  <span class="brand-text">ProxiWake</span>
 </div>
 
-<!-- ═══════════════ SETUP VIEW ═══════════════ -->
-<div id="v-setup" style="flex:1;display:flex;flex-direction:column;padding-top:16px">
+<!-- floating recenter button -->
+<button class="fab" id="btn-recenter" aria-label="Recenter">
+  <span class="fab-ic" data-icon="locate"></span>
+</button>
 
-  <!-- Travel Mode -->
-  <div class="card slide-up" style="animation-delay:.05s">
-    <div class="card-title">Travel mode</div>
-    <div class="modes" id="modes">
-      <button class="mode-btn active" id="m-bus" ontouchend="pickMode(event,'bus')" onclick="pickMode(event,'bus')">
-        <span class="mode-icon">🚌</span><span class="mode-label">Bus</span><span class="mode-sub">City &amp; intercity</span>
-      </button>
-      <button class="mode-btn" id="m-train" ontouchend="pickMode(event,'train')" onclick="pickMode(event,'train')">
-        <span class="mode-icon">🚆</span><span class="mode-label">Train</span><span class="mode-sub">Rail &amp; metro</span>
-      </button>
-      <button class="mode-btn" id="m-flight" ontouchend="pickMode(event,'flight')" onclick="pickMode(event,'flight')">
-        <span class="mode-icon">✈️</span><span class="mode-label">Flight</span><span class="mode-sub">Aerial sightseeing</span>
-      </button>
-    </div>
+<!-- ═══════════════ SETUP SHEET ═══════════════ -->
+<div id="v-setup" class="sheet open">
+  <div class="sheet-grab" role="button" aria-label="Expand options"></div>
+
+  <div class="sheet-summary" id="setup-summary-row">
+    <span class="sheet-pin"><span data-icon="pin"></span></span>
+    <span class="sheet-summary-text" id="setup-summary">Choose a destination</span>
+    <span class="sheet-chev" data-icon="chev"></span>
   </div>
 
-  <!-- Destination -->
-  <div class="card slide-up" style="animation-delay:.1s">
-    <div class="card-title">Destination</div>
-    <div class="search-wrap">
-      <input class="input-field" type="search" id="search-box" placeholder="Search any place, station, city..." autocomplete="off" autocorrect="off" spellcheck="false">
-      <div class="search-results" id="search-results"></div>
-    </div>
-    <div class="input-row">
-      <input class="input-field" type="text" inputmode="decimal" id="inp-lat" placeholder="Latitude">
-      <input class="input-field" type="text" inputmode="decimal" id="inp-lng" placeholder="Longitude">
-    </div>
-    <button class="gps-btn" ontouchend="getMyGPS(event)" onclick="getMyGPS(event)">📍 Use my current GPS position</button>
-  </div>
+  <button class="btn-primary disabled" id="btn-go">Enter destination to activate</button>
 
-  <!-- Alert Radius -->
-  <div class="card slide-up" style="animation-delay:.15s">
-    <div class="card-title">Alert radius</div>
-    <div class="slider-header">
-      <span style="font-size:13px;color:var(--fg2)">Wake me when within</span>
-      <span class="slider-value" id="rad-val">1.0 km</span>
+  <div class="sheet-detail">
+
+    <div class="card">
+      <div class="card-title"><span data-icon="pin"></span>Travel mode</div>
+      <div class="modes" id="modes">
+        <button class="mode-btn active" id="m-bus">
+          <span class="mode-ic" data-icon="bus"></span><span class="mode-label">Bus</span><span class="mode-sub">City & intercity</span>
+        </button>
+        <button class="mode-btn" id="m-train">
+          <span class="mode-ic" data-icon="train"></span><span class="mode-label">Train</span><span class="mode-sub">Rail & metro</span>
+        </button>
+        <button class="mode-btn" id="m-flight">
+          <span class="mode-ic" data-icon="plane"></span><span class="mode-label">Flight</span><span class="mode-sub">Aerial sightseeing</span>
+        </button>
+      </div>
     </div>
-    <input type="range" id="rad-slider" min="200" max="10000" step="100" value="1000" oninput="onRadius()">
-    <div class="slider-labels"><span id="rad-min">200 m</span><span id="rad-max">10 km</span></div>
-  </div>
 
-  <!-- Alarm Intensity -->
-  <div class="card slide-up" style="animation-delay:.2s">
-    <div class="card-title">Alarm intensity</div>
-    <div class="alarm-levels">
-      <button class="alarm-btn" id="a1" ontouchend="pickAlarm(event,1)" onclick="pickAlarm(event,1)">
-        <span class="alarm-label" style="color:var(--accent)">Gentle</span><span class="alarm-desc">Vibrate only</span>
-      </button>
-      <button class="alarm-btn a-yellow" id="a2" ontouchend="pickAlarm(event,2)" onclick="pickAlarm(event,2)">
-        <span class="alarm-label" style="color:var(--warn)">Moderate</span><span class="alarm-desc">Vibrate + tone</span>
-      </button>
-      <button class="alarm-btn" id="a3" ontouchend="pickAlarm(event,3)" onclick="pickAlarm(event,3)">
-        <span class="alarm-label" style="color:var(--danger)">Aggressive</span><span class="alarm-desc">Full volume + flash</span>
-      </button>
+    <div class="card">
+      <div class="card-title"><span data-icon="search"></span>Destination</div>
+      <div class="search-wrap">
+        <input class="input-field has-ic" type="search" id="search-box" placeholder="Search any place, station, city..." autocomplete="off" autocorrect="off" spellcheck="false">
+        <span class="field-ic" data-icon="search"></span>
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <div class="input-row">
+        <input class="input-field" type="text" inputmode="decimal" id="inp-lat" placeholder="Latitude">
+        <input class="input-field" type="text" inputmode="decimal" id="inp-lng" placeholder="Longitude">
+      </div>
+      <button class="ghost-btn" id="btn-gps"><span class="ghost-ic" data-icon="locate"></span>Use my current GPS position</button>
+      <div class="hint"><span data-icon="pin"></span>Or tap the map (or drag the pin) to set it.</div>
     </div>
-  </div>
 
-  <button class="btn-primary disabled" id="btn-go" ontouchend="activate(event)" onclick="activate(event)">Enter destination to activate</button>
+    <div class="card">
+      <div class="card-title"><span data-icon="radius"></span>Alert radius</div>
+      <div class="slider-row">
+        <span class="slider-caption">Wake me when within</span>
+        <span class="slider-value" id="rad-val">1.0 km</span>
+      </div>
+      <div class="range-wrap">
+        <div class="range-track"><div class="range-fill" id="rad-fill"></div></div>
+        <input type="range" id="rad-slider" min="200" max="10000" step="100" value="1000">
+      </div>
+      <div class="slider-labels"><span id="rad-min">200 m</span><span id="rad-max">10 km</span></div>
+    </div>
 
-  <div class="footer">
-    ProxiWake v0.3 PWA · Keep this tab open while traveling<br>
-    Screen Wake Lock keeps display active · Works on any phone browser
+    <div class="card">
+      <div class="card-title"><span data-icon="bell"></span>Early warning</div>
+      <label class="switch-row">
+        <span>Notify me before arrival</span>
+        <input type="checkbox" id="pre-toggle" class="switch" checked>
+      </label>
+      <div class="input-row" style="margin-top:12px">
+        <label class="field-label">Time before (min)
+          <input class="input-field" type="number" id="pre-time" min="0" max="120" step="1" inputmode="numeric" value="5">
+        </label>
+        <label class="field-label">Distance before (m)
+          <input class="input-field" type="number" id="pre-distance" min="0" step="50" inputmode="numeric" value="1000">
+        </label>
+      </div>
+      <div class="pre-warn" id="pre-warn" style="display:none"></div>
+      <div class="hint">Fires whichever comes first. Set either to 0 to disable it.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span data-icon="screen"></span>Screen</div>
+      <label class="switch-row">
+        <span>Auto-lock while traveling</span>
+        <input type="checkbox" id="auto-lock-toggle" class="switch" checked>
+      </label>
+      <div class="hint">Keeps the screen awake for GPS but blocks accidental taps. Hold the button on the lock screen to unlock.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span data-icon="alarm"></span>Alarm intensity</div>
+      <div class="alarm-levels">
+        <button class="alarm-btn" id="a1">
+          <span class="alarm-ic"><span data-icon="bell"></span></span>
+          <span class="alarm-label">Gentle</span><span class="alarm-desc">Vibrate only</span>
+        </button>
+        <button class="alarm-btn a-yellow" id="a2">
+          <span class="alarm-ic"><span data-icon="volume"></span></span>
+          <span class="alarm-label">Moderate</span><span class="alarm-desc">Vibrate + tone</span>
+        </button>
+        <button class="alarm-btn a-red" id="a3">
+          <span class="alarm-ic"><span data-icon="alarm"></span></span>
+          <span class="alarm-label">Aggressive</span><span class="alarm-desc">Full volume + flash</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sheet-foot">ProxiWake v0.8 · Installable PWA · Wake Lock keeps GPS alive</div>
   </div>
 </div>
 
-<!-- ═══════════════ TRACKING VIEW ═══════════════ -->
-<div id="v-track" class="tracking-view" style="display:none">
-  <div class="dest-info slide-up">
-    <div style="font-size:32px;margin-bottom:6px" id="t-icon">🚌</div>
-    <div class="dest-name" id="t-name">—</div>
-    <div class="dest-coords" id="t-coords">—</div>
-  </div>
+<!-- ═══════════════ ACTIVE-TRIP SHEET ═══════════════ -->
+<div id="v-track" class="sheet" style="display:none">
+  <div class="sheet-grab" role="button" aria-label="Details"></div>
 
-  <div class="radar-container">
-    <div class="radar-ring on" id="r1"></div>
-    <div class="radar-ring on" id="r2"></div>
-    <div class="radar-ring on" id="r3"></div>
-    <div class="radar-dot tracking" id="r-dot">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M16.24 7.76a6 6 0 010 8.49"/><path d="M19.07 4.93a10 10 0 010 14.14"/></svg>
+  <div class="dest-head">
+    <span class="dest-ic" id="t-icon" data-icon="bus"></span>
+    <div class="dest-name-wrap">
+      <div class="dest-name" id="t-name">—</div>
+      <div class="dest-coords" id="t-coords">—</div>
     </div>
   </div>
 
-  <div class="distance-box normal" id="d-box">
-    <div class="distance-label" id="d-label">Distance remaining</div>
-    <div class="distance-value" id="d-val" style="color:var(--fg)">Acquiring GPS...</div>
+  <div class="hero">
+    <div class="hero-col" id="eta-box">
+      <div class="distance-label" id="eta-label">ETA to wake-up zone</div>
+      <div class="eta-val" id="eta-val">—</div>
+      <div class="eta-sub" id="eta-sub"></div>
+    </div>
+    <div id="d-box" class="hero-col hero-div">
+      <div class="distance-label" id="d-label">Distance</div>
+      <div class="distance-value" id="d-val" style="color:var(--fg)">Acquiring GPS...</div>
+    </div>
   </div>
 
-  <div class="progress-bar"><div class="progress-fill" id="p-fill" style="width:0%;background:var(--accent)"></div></div>
+  <div class="progress-bar"><div class="progress-fill" id="p-fill" style="width:0%"></div></div>
   <div class="progress-labels"><span id="t-elapsed">Tracking for 0s</span><span id="t-pct">0% there</span></div>
 
-  <div class="info-grid">
-    <div class="info-cell"><div class="info-cell-label">Your lat</div><div class="info-cell-value" id="c-mylat">—</div></div>
-    <div class="info-cell"><div class="info-cell-label">Your lng</div><div class="info-cell-value" id="c-mylng">—</div></div>
-    <div class="info-cell"><div class="info-cell-label">Target lat</div><div class="info-cell-value" id="c-tlat">—</div></div>
-    <div class="info-cell"><div class="info-cell-label">Target lng</div><div class="info-cell-value" id="c-tlng">—</div></div>
+  <div class="sheet-actions">
+    <button class="ghost-btn trip-btn" id="btn-lock"><span class="ghost-ic" data-icon="lock"></span>Lock screen</button>
+    <button class="btn-stop" id="btn-stop"><span class="stop-ic" data-icon="stop"></span>Cancel trip</button>
   </div>
 
-  <div class="status-bar" id="s-bat">
-    <div class="status-dot green"></div>
-    <div class="status-label"><b>Smart battery mode</b><br><span id="s-bat-text">Acquiring position...</span></div>
-  </div>
+  <div class="sheet-detail">
+    <div class="info-grid">
+      <div class="info-cell"><div class="info-cell-label">Your lat</div><div class="info-cell-value" id="c-mylat">—</div></div>
+      <div class="info-cell"><div class="info-cell-label">Your lng</div><div class="info-cell-value" id="c-mylng">—</div></div>
+      <div class="info-cell"><div class="info-cell-label">Target lat</div><div class="info-cell-value" id="c-tlat">—</div></div>
+      <div class="info-cell"><div class="info-cell-label">Target lng</div><div class="info-cell-value" id="c-tlng">—</div></div>
+      <div class="info-cell"><div class="info-cell-label">Speed</div><div class="info-cell-value" id="c-speed">—</div></div>
+    </div>
 
-  <div class="status-bar" id="s-wl">
-    <div class="status-dot yellow" id="s-wl-dot"></div>
-    <div class="status-label"><b>Screen Wake Lock</b><br><span id="s-wl-text">Requesting...</span></div>
-  </div>
+    <div class="status-bar" id="s-bat">
+      <div class="status-dot green"></div>
+      <span class="status-ic" data-icon="radar"></span>
+      <div class="status-label"><b>Smart battery mode</b><br><span id="s-bat-text">Acquiring position...</span></div>
+    </div>
 
-  <button class="btn-stop" ontouchend="deactivate(event)" onclick="deactivate(event)">Deactivate alarm</button>
+    <div class="status-bar" id="s-wl">
+      <div class="status-dot yellow" id="s-wl-dot"></div>
+      <span class="status-ic" data-icon="battery"></span>
+      <div class="status-label"><b>Screen Wake Lock</b><br><span id="s-wl-text">Requesting...</span></div>
+    </div>
+  </div>
 </div>
 
-<script>
-/* ═══════════════ STATE ═══════════════ */
-const S={mode:'bus',name:'',lat:null,lng:null,radius:1000,alarm:2,
-  active:false,triggered:false,watchId:null,wakeLock:null,
-  startTime:null,audioCtx:null,intervals:[],initDist:null};
+<!-- ═══════════════ TRAVEL LOCK OVERLAY ═══════════════ -->
+<div id="lock-overlay" class="lock-overlay" aria-hidden="true" style="display:none">
+  <div class="lock-glow"></div>
+  <div class="lock-inner">
+    <span class="lock-icon"><span id="lock-icon" data-icon="lock"></span></span>
+    <div class="lock-name" id="lock-name">—</div>
+    <div class="lock-distance" id="lock-distance">—</div>
+    <div class="lock-eta-label" id="lock-eta-label">ETA to wake-up zone</div>
+    <div class="lock-eta" id="lock-eta">—</div>
+    <div class="lock-status" id="lock-status">Acquiring GPS…</div>
+    <button class="lock-hold" id="lock-unlock">
+      <span class="lock-hold-fill"></span>
+      <span class="lock-hold-text">Hold to unlock</span>
+    </button>
+    <div class="lock-hint">Touch is disabled to prevent accidental taps</div>
+  </div>
+</div>
 
-const MODES={
-  bus:{icon:'🚌',r:1000,min:200,max:10000,step:100},
-  train:{icon:'🚆',r:2000,min:200,max:10000,step:100},
-  flight:{icon:'✈️',r:15000,min:5000,max:50000,step:1000}
-};
-
-/* ═══════════════ UTILS ═══════════════ */
-function haversine(a1,o1,a2,o2){
-  const R=6371000,r=d=>d*Math.PI/180,dA=r(a2-a1),dO=r(o2-o1);
-  const x=Math.sin(dA/2)**2+Math.cos(r(a1))*Math.cos(r(a2))*Math.sin(dO/2)**2;
-  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-}
-function fmt(m){return m>=1000?(m/1000).toFixed(1)+' km':Math.round(m)+' m'}
-function $(id){return document.getElementById(id)}
-
-/* ═══════════════ MODE SELECTION (iOS-safe) ═══════════════ */
-function pickMode(e,m){
-  if(e)e.preventDefault();
-  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
-  $('m-'+m).classList.add('active');
-  S.mode=m;
-  const c=MODES[m];S.radius=c.r;
-  const sl=$('rad-slider');sl.min=c.min;sl.max=c.max;sl.step=c.step;sl.value=c.r;
-  $('rad-min').textContent=fmt(c.min);$('rad-max').textContent=fmt(c.max);
-  onRadius();
-}
-
-/* ═══════════════ RADIUS ═══════════════ */
-function onRadius(){S.radius=parseInt($('rad-slider').value);$('rad-val').textContent=fmt(S.radius)}
-
-/* ═══════════════ ALARM LEVEL (iOS-safe) ═══════════════ */
-function pickAlarm(e,lv){
-  if(e)e.preventDefault();
-  S.alarm=lv;
-  ['a1','a2','a3'].forEach(id=>$(id).className='alarm-btn');
-  $(('a'+lv)).classList.add(lv===1?'a-green':lv===2?'a-yellow':'a-red');
-}
-
-/* ═══════════════ LOCATION SEARCH (Nominatim, debounced) ═══════════════ */
-let searchTimer=null;
-const searchBox=$('search-box');
-const searchResults=$('search-results');
-
-searchBox.addEventListener('input',function(){
-  const q=this.value.trim();
-  clearTimeout(searchTimer);
-  if(q.length<3){searchResults.classList.remove('open');return}
-  searchResults.innerHTML='<div class="search-loading">Searching</div>';
-  searchResults.classList.add('open');
-  searchTimer=setTimeout(()=>doSearch(q),800);/* debounce 800ms, respects Nominatim 1req/s */
-});
-
-searchBox.addEventListener('focus',function(){
-  if(this.value.trim().length>=3&&searchResults.children.length>0)searchResults.classList.add('open');
-});
-
-async function doSearch(q){
-  try{
-    const url='https://nominatim.openstreetmap.org/search?format=json&limit=6&q='+encodeURIComponent(q);
-    const res=await fetch(url,{headers:{'Accept':'application/json'}});
-    if(!res.ok)throw new Error('Network error');
-    const data=await res.json();
-    if(!data.length){
-      searchResults.innerHTML='<div class="search-hint">No results found. Try a different search.</div>';
-      return;
-    }
-    searchResults.innerHTML=data.map(p=>{
-      const parts=p.display_name.split(',');
-      const main=parts.slice(0,2).join(',').trim();
-      const detail=parts.slice(2,4).join(',').trim();
-      return `<div class="sr-item" ontouchend="pickResult(event,${p.lat},${p.lon},'${main.replace(/'/g,"\\'")}')" onclick="pickResult(event,${p.lat},${p.lon},'${main.replace(/'/g,"\\'")}')">
-        <div class="sr-name">${main}</div>
-        ${detail?'<div class="sr-detail">'+detail+'</div>':''}
-        <div class="sr-coord">${parseFloat(p.lat).toFixed(4)}, ${parseFloat(p.lon).toFixed(4)}</div>
-      </div>`;
-    }).join('');
-  }catch(err){
-    searchResults.innerHTML='<div class="search-hint">Search unavailable. Enter coordinates manually.</div>';
-  }
-}
-
-function pickResult(e,lat,lng,name){
-  if(e)e.preventDefault();
-  S.lat=parseFloat(lat);S.lng=parseFloat(lng);S.name=name;
-  searchBox.value=name;
-  $('inp-lat').value=S.lat.toFixed(6);
-  $('inp-lng').value=S.lng.toFixed(6);
-  searchResults.classList.remove('open');
-  checkReady();
-}
-
-/* Close results when tapping outside */
-document.addEventListener('touchstart',function(e){
-  if(!e.target.closest('.search-wrap'))searchResults.classList.remove('open');
-},{passive:true});
-document.addEventListener('click',function(e){
-  if(!e.target.closest('.search-wrap'))searchResults.classList.remove('open');
-});
-
-/* ═══════════════ MANUAL COORDINATE ENTRY ═══════════════ */
-$('inp-lat').addEventListener('input',function(){S.lat=parseFloat(this.value)||null;S.name=searchBox.value||'Custom location';checkReady()});
-$('inp-lng').addEventListener('input',function(){S.lng=parseFloat(this.value)||null;checkReady()});
-
-/* ═══════════════ GPS BUTTON ═══════════════ */
-function getMyGPS(e){
-  if(e)e.preventDefault();
-  if(!navigator.geolocation){alert('Geolocation not available in this browser');return}
-  navigator.geolocation.getCurrentPosition(p=>{
-    $('inp-lat').value=p.coords.latitude.toFixed(6);
-    $('inp-lng').value=p.coords.longitude.toFixed(6);
-    S.lat=p.coords.latitude;S.lng=p.coords.longitude;
-    S.name='Current GPS position';searchBox.value=S.name;
-    checkReady();
-  },err=>alert('GPS error: '+err.message),{enableHighAccuracy:true,timeout:15000});
-}
-
-/* ═══════════════ VALIDATION ═══════════════ */
-function checkReady(){
-  const ok=S.lat!==null&&S.lng!==null&&!isNaN(S.lat)&&!isNaN(S.lng);
-  const btn=$('btn-go');
-  btn.className=ok?'btn-primary ready':'btn-primary disabled';
-  btn.textContent=ok?'Activate ProxiWake':'Enter destination to activate';
-}
-
-/* ═══════════════ WAKE LOCK ═══════════════ */
-async function requestWL(){
-  try{
-    if('wakeLock' in navigator){
-      S.wakeLock=await navigator.wakeLock.request('screen');
-      S.wakeLock.addEventListener('release',()=>{$('s-wl-text').textContent='Released — reopen app to restore';$('s-wl-dot').className='status-dot yellow'});
-      $('s-wl-text').textContent='Active — screen will stay on (dimmed)';
-      $('s-wl-dot').className='status-dot green';
-    }else{
-      $('s-wl-text').textContent='Not supported — keep screen on manually';
-    }
-  }catch(e){$('s-wl-text').textContent='Failed: '+e.message}
-}
-document.addEventListener('visibilitychange',()=>{
-  if(S.active&&document.visibilityState==='visible'&&!S.wakeLock)requestWL();
-});
-
-/* ═══════════════ ALARM SOUND ═══════════════ */
-function playTone(lv){
-  if(!S.audioCtx)S.audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  const ctx=S.audioCtx,o=ctx.createOscillator(),g=ctx.createGain();
-  o.connect(g);g.connect(ctx.destination);
-  if(lv===1){o.frequency.value=440;g.gain.value=.12;o.type='sine'}
-  else if(lv===2){o.frequency.value=660;g.gain.value=.35;o.type='triangle'}
-  else{o.frequency.value=880;g.gain.value=.75;o.type='square'}
-  o.start();setTimeout(()=>{o.stop();o.disconnect();g.disconnect()},500);
-}
-
-function triggerAlarm(){
-  if(S.triggered)return;S.triggered=true;
-  /* vibrate */
-  if(navigator.vibrate){
-    const pat=S.alarm===1?[300,100,300]:S.alarm===2?[500,200,500,200,500]:[1000,200,1000,200,1000,200,1000];
-    navigator.vibrate(pat);
-  }
-  if(S.alarm>=2)playTone(S.alarm);
-  /* repeating */
-  const iv=setInterval(()=>{
-    if(navigator.vibrate){const p=S.alarm===1?[300,100,300]:S.alarm===2?[500,200,500,200,500]:[1000,200,1000,200,1000];navigator.vibrate(p)}
-    if(S.alarm>=2)playTone(S.alarm);
-  },S.alarm===3?2000:4000);
-  S.intervals.push(iv);
-  /* notification */
-  if('Notification' in window&&Notification.permission==='granted')
-    new Notification('ProxiWake',{body:'Arriving at '+S.name+'!',requireInteraction:true});
-  /* UI */
-  $('d-box').className='distance-box alert';
-  $('d-label').innerHTML='<div class="alert-text">WAKE UP — YOU\'RE ARRIVING</div>';
-  $('d-val').style.color='var(--danger)';
-  $('r-dot').className='radar-dot arriving';
-  document.querySelectorAll('.radar-ring').forEach(r=>r.style.borderColor='var(--danger)');
-  $('p-fill').style.background='var(--danger)';
-  /* flash for level 3 */
-  if(S.alarm===3){let on=false;const fi=setInterval(()=>{on=!on;document.body.style.background=on?'#1a0505':'var(--bg)'},300);S.intervals.push(fi)}
-}
-
-/* ═══════════════ ACTIVATE ═══════════════ */
-function activate(e){
-  if(e)e.preventDefault();
-  if(S.lat===null||S.lng===null)return;
-  S.active=true;S.triggered=false;S.startTime=Date.now();S.initDist=null;
-  if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
-  /* switch view */
-  $('v-setup').style.display='none';
-  const tv=$('v-track');tv.style.display='flex';tv.className='tracking-view fade-in';
-  $('t-icon').textContent=MODES[S.mode].icon;
-  $('t-name').textContent=S.name||'Custom location';
-  $('t-coords').textContent=S.lat.toFixed(4)+', '+S.lng.toFixed(4)+' · Radius: '+fmt(S.radius);
-  $('c-tlat').textContent=S.lat.toFixed(6);$('c-tlng').textContent=S.lng.toFixed(6);
-  requestWL();
-  startGPS();
-}
-
-function startGPS(){
-  if(!navigator.geolocation){$('d-val').textContent='GPS unavailable';return}
-  S.watchId=navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,timeout:20000,maximumAge:0});
-  const ti=setInterval(()=>{
-    const s=Math.floor((Date.now()-S.startTime)/1000),m=Math.floor(s/60);
-    $('t-elapsed').textContent='Tracking for '+(m?m+'m ':'')+s%60+'s';
-  },1000);
-  S.intervals.push(ti);
-}
-
-function onPos(p){
-  const la=p.coords.latitude,lo=p.coords.longitude;
-  const d=haversine(la,lo,S.lat,S.lng);
-  if(S.initDist===null)S.initDist=d;
-  $('c-mylat').textContent=la.toFixed(6);$('c-mylng').textContent=lo.toFixed(6);
-  $('d-val').textContent=fmt(d);
-  const pct=Math.max(0,Math.min(100,Math.round(100-(d/S.initDist)*100)));
-  $('p-fill').style.width=pct+'%';$('t-pct').textContent=pct+'% there';
-  /* battery hint */
-  const bt=$('s-bat-text'),bd=S.active?$('s-bat').querySelector('.status-dot'):null;
-  if(d>S.radius*3){bt.textContent='Low-power — you\'re far away';if(bd)bd.className='status-dot green'}
-  else if(d>S.radius){bt.textContent='Medium polling — approaching zone';if(bd)bd.className='status-dot yellow'}
-  else{bt.textContent='High-precision — almost there!';if(bd)bd.className='status-dot green'}
-  if(d<=S.radius&&!S.triggered)triggerAlarm();
-}
-
-function onErr(e){$('d-val').textContent='GPS Error';$('s-bat-text').textContent=e.message}
-
-/* ═══════════════ DEACTIVATE ═══════════════ */
-function deactivate(e){
-  if(e)e.preventDefault();
-  S.active=false;S.triggered=false;
-  if(S.watchId!==null){navigator.geolocation.clearWatch(S.watchId);S.watchId=null}
-  if(S.wakeLock){try{S.wakeLock.release()}catch(x){};S.wakeLock=null}
-  S.intervals.forEach(i=>clearInterval(i));S.intervals=[];
-  if(navigator.vibrate)navigator.vibrate(0);
-  document.body.style.background='var(--bg)';
-  /* reset tracking UI */
-  $('d-box').className='distance-box normal';
-  $('d-label').textContent='Distance remaining';$('d-val').style.color='var(--fg)';
-  $('r-dot').className='radar-dot tracking';
-  document.querySelectorAll('.radar-ring').forEach(r=>{r.style.borderColor='var(--accent)'});
-  $('p-fill').style.width='0%';$('p-fill').style.background='var(--accent)';
-  /* switch view */
-  $('v-track').style.display='none';
-  $('v-setup').style.display='flex';
-}
-
-/* ═══════════════ SERVICE WORKER REGISTRATION ═══════════════ */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
-</script>
+<script src="vendor/leaflet/leaflet.js"></script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>

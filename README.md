@@ -1,88 +1,111 @@
-# ProxiWake — GPS Proximity Alarm for Travelers
+# ProxiWake — GPS Proximity Alarm with Live ETA
 
 **Never miss your bus stop, train station, or aerial sightseeing moment again.**
 
-ProxiWake is a Progressive Web App (PWA) that triggers an alarm when you approach a destination. Set your target location, choose an alert radius, and rest — ProxiWake monitors your GPS and wakes you when you arrive.
+ProxiWake is a Progressive Web App (PWA) that triggers an alarm when you approach a
+destination. Set your target on a map (or by search/coordinates), choose an alert
+radius, and rest — ProxiWake monitors your GPS, shows a **live ETA countdown based on
+your current speed**, and wakes you when you arrive.
+
+> This project is a fork of
+> [Manasteja/proxiwake](https://github.com/Manasteja/proxiwake) (MIT). See `LICENSE`.
 
 ## Features
 
-- **Three travel modes**: Bus (200m–10km radius), Train (200m–10km), Flight (5km–50km)
-- **Location search**: Type any place name — powered by OpenStreetMap Nominatim geocoding
-- **Manual coordinates**: Enter lat/lng directly or use your current GPS position
-- **Escalating alarms**: Gentle (vibrate), Moderate (vibrate + tone), Aggressive (full volume + screen flash)
-- **Screen Wake Lock**: Prevents the phone from sleeping during tracking
-- **Smart battery indicators**: Shows polling frequency based on distance remaining
-- **Real-time tracking**: Live distance calculation using Haversine formula
-- **Installable**: Add to home screen on iOS and Android for app-like experience
-- **Offline capable**: Service Worker caches the app for offline use
-- **No account required**: Zero backend, everything runs on-device
+- **App-like full-screen map layout** — the map is the canvas (Google Maps style):
+  floating brand chip + recenter button, and glassy bottom sheets. Before the trip the
+  sheet holds all options (mode, destination, radius, early warning, screen, intensity);
+  during the trip it becomes a live stats card with **Lock screen** and **Cancel trip**.
+- **Interactive map** — Leaflet + OpenStreetMap. Tap the map (or drag the pin) to set
+  your destination; radius shown as a live circle;/user and destination kept framed
+  together while tracking.
+- **Live ETA countdown** — estimates your speed (device-reported + derived, smoothed)
+  and counts down the time until the wake-up zone, with an ETA to the destination.
+- **Configurable early warning (pre-alert)** — notify before arrival by **time and/or
+  distance** (default 5 min *or* 1 km, whichever comes first). Fires a soft tone,
+  vibration and a system notification once, then re-arms.
+- **Location search** — type any place name (OpenStreetMap Nominatim geocoding).
+- **Manual coordinates / current GPS** — enter lat/lng or use your position.
+- **Three travel modes** — Bus, Train, Flight (different radius ranges).
+- **Escalating alarms** — Gentle (vibrate), Moderate (vibrate + tone), Aggressive
+  (full volume + screen flash). Repeats until dismissed.
+- **Screen Wake Lock**, **smart battery indicators**, **live distance/progress**.
+- **Travel lock** — an in-app overlay that keeps the screen awake for GPS but blocks
+  accidental touches. Auto-locks when idle (configurable) and unlocks via a deliberate
+  1.5 s hold.
+- **Installable & offline-capable** (service worker caches the app shell; it skips
+  registration on localhost so dev reloads stay fresh).
+- **Real app icon & splash** — PNG icons `any` + `maskable` in the manifest, and
+  device-sized iOS launch images (`apple-touch-startup-image`); Android derives its
+  boot splash from `background_color` + the manifest icons.
+- **No account, no backend** — everything runs on-device.
 
-## Live Demo
+## Project structure
 
-**[https://YOUR_USERNAME.github.io/proxiwake/](https://YOUR_USERNAME.github.io/proxiwake/)**
-
-## Deploy to GitHub Pages
-
-1. Create a new repository on GitHub named `proxiwake`
-2. Clone it locally:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/proxiwake.git
-   cd proxiwake
-   ```
-3. Copy the project files (`index.html`, `manifest.json`, `sw.js`) into the repo
-4. Push to GitHub:
-   ```bash
-   git add .
-   git commit -m "Initial ProxiWake PWA"
-   git push origin main
-   ```
-5. Go to **Settings → Pages** → Source: **Deploy from a branch** → Branch: **main** → Folder: **/ (root)**
-6. Your app will be live at `https://YOUR_USERNAME.github.io/proxiwake/`
-
-## How It Works
-
-### PWA Architecture
 ```
-index.html          — Complete single-file app (HTML + CSS + JS)
-manifest.json       — PWA manifest for installability
-sw.js               — Service Worker for offline caching
+index.html            markup + module entry
+manifest.json         PWA manifest
+sw.js                 service worker (cache-first app shell)
+css/styles.css        all styles
+assets/
+  icons/              app icons (192/512 PNG, maskable, apple-touch)
+  splash/             iOS launch images for common devices
+brand tool:
+  tools/brand.html    renders icons & splash via query param (?type=icon|maskable|splash);
+                      resize the browser viewport to the target pixel size and screenshot
+js/
+  config.js           constants, travel modes, defaults
+  state.js            single source of truth + pub/sub + localStorage
+  utils.js            haversine, formatting, DOM helpers
+  ui.js               all DOM rendering
+  map.js              Leaflet map, markers, radius circle, user trace
+  search.js           Nominatim search, manual coords, GPS button
+  wakelock.js         screen wake lock
+  alarm.js            Web Audio tone, vibration, notifications
+  eta.js              speed estimation, ETA math, pre-alert logic
+  tracking.js         geolocation watch + 1s countdown ticker
+  lock.js             travel lock overlay (touch blocking + auto-lock)
+  main.js             boot & event wiring
+vendor/leaflet/       vendored Leaflet 1.9.4 (for offline app shell)
 ```
 
-### Technical Details
-- **Geolocation**: Uses `navigator.geolocation.watchPosition()` for continuous GPS updates
-- **Distance calculation**: Haversine formula for accurate great-circle distance
-- **Wake Lock**: `navigator.wakeLock.request('screen')` prevents device sleep
-- **Alarms**: Web Audio API for tone generation + Vibration API
-- **Search**: OpenStreetMap Nominatim API (debounced, 1 req/sec max per policy)
-- **No frameworks**: Zero dependencies, pure vanilla HTML/CSS/JS
+## Run locally
 
-### Known PWA Limitations
-- **Must stay open**: GPS tracking stops if the browser tab is backgrounded (this is a web platform limitation, not a bug)
-- **Wake Lock keeps screen on**: The screen dims but stays active — required for continuous GPS
-- **Underground**: GPS may not work in tunnels or underground metro (physics constraint)
+ES modules require `http(s)` (not `file://`). Any static server works:
 
-## Roadmap to Native App
+```bash
+npx serve .          # or: python3 -m http.server 8080
+```
 
-This PWA validates the core UX. The native app (React Native) will add:
-- True background geofencing via native APIs
-- Lock-screen notifications
-- Apple Watch / WearOS companion
-- OS-level battery optimization
-- App Store / Play Store distribution
+Open `http://localhost:8080`. For **mobile testing over LAN**, geolocation needs a
+secure context — use a tunnel (e.g. `cloudflared tunnel --url http://localhost:8080`)
+or `vite-plugin-mkcert`.
 
-## Tech Stack
+On desktop Chrome, mock movement via **DevTools → Sensors → Location** to test the
+ETA, pre-alert (time & distance) and radius alarm.
 
-| Layer | Technology |
-|-------|-----------|
-| UI | Vanilla HTML/CSS/JS |
-| Fonts | DM Sans + JetBrains Mono (Google Fonts) |
-| GPS | Web Geolocation API |
-| Search | OpenStreetMap Nominatim |
-| Caching | Service Worker + Cache API |
-| Installability | Web App Manifest |
-| Wake | Screen Wake Lock API |
-| Alerts | Web Audio API + Vibration API |
+## How the ETA works
+
+- Speed: prefers the device-reported `coords.speed` when sane, otherwise derives it
+  from successive fixes (`distance / dt`), smoothed with an EMA. Fixes with poor
+  accuracy or no movement are ignored; long gaps (tunnels) reset the estimate.
+- ETA to the wake-up zone = `(distance − radius) / speed`; the countdown interpolates
+  smoothly between GPS fixes using a 1-second ticker.
+- Pre-alert fires when **either** the time threshold **or** the distance threshold is
+  crossed, then re-arms only after both clear a 15% buffer (hysteresis).
+
+## Known PWA limitations
+
+- **Must stay open** — GPS tracking stops if the browser tab is backgrounded (web
+  platform limitation). The Screen Wake Lock keeps the display alive while foregrounded.
+  **A service worker cannot replace this:** `navigator.geolocation` is unavailable in a
+  service worker, and Background/Periodic Background Sync are network-only and
+  throttled, so they cannot poll GPS. That is why the app keeps the screen on and uses
+  the **travel lock** overlay to prevent accidental touches instead.
+- **Map tiles** — OSM public tiles need network; only the app shell is cached offline.
+  For production use a proper tile provider per the OSM tile usage policy.
+- **Underground** — GPS may not work in tunnels or underground metro.
 
 ## License
 
-MIT
+MIT — see `LICENSE`. Original work © Manasteja.
